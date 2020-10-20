@@ -278,3 +278,20 @@ class AggregateHouseholds(BaseEstimator, TransformerMixin):
         X.fillna(0, inplace=True)
 
         return X
+
+class ExportCleanData(BaseEstimator, TransformerMixin):
+    def __init__(self,output_folder=None):
+        if not isinstance(output_folder, str):
+            self.output_folder = str(output_folder)
+        else:
+            self.output_folder = output_folder
+
+    def fit(self, X: pd.DataFrame, y: pd.Series = None):
+        return self
+
+    def transform(self, X: pd.DataFrame):
+
+        X = X.copy()
+        X.to_excel(f"{self.output_folder}/clean_data.xlsx")
+
+        return X

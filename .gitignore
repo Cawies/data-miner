@@ -2,6 +2,7 @@
 
 # Data files
 *.csv
+*.xlsx
 
 # Cache and the like
 __pycache__/
@@ -18,3 +19,4 @@ env.bak/
 venv.bak/
 
 .ipynb_checkpoints
+.vscode
