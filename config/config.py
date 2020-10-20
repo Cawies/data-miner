@@ -17,8 +17,8 @@ This section specifies the environment variables (if any)
 for use in data access, data publishing or package deployment.
 If made public, make sure to NOT include any user credentials here!!
 """
-ACCESS_KEY_ID = 'Dont store in source code'
-SECRET_ACCESS_KEY = 'Dont store in source code'
+ACCESS_KEY_ID = 'YOUR ACCESS KEY ID'
+SECRET_ACCESS_KEY = 'YOUR SECRET ACCESS KEY'
 
 
 # VARIABLE SPECIFICATIONS
