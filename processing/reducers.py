@@ -247,6 +247,22 @@ class DecisionTreeRoC(BaseEstimator, TransformerMixin):
         variables_to_keep = list(roc_values[roc_values>roc_values.mean()].index)
         X = X[variables_to_keep+['Target']].copy()
         print(f"Number of variables remaining: {len(X.columns)}")
-        X.to_excel('decision_tree.xlsx')
         
+        return X
+
+class ExportReducedData(BaseEstimator, TransformerMixin):
+    def __init__(self,output_folder=None):
+        if not isinstance(output_folder, str):
+            self.output_folder = str(output_folder)
+        else:
+            self.output_folder = output_folder
+
+    def fit(self, X: pd.DataFrame, y: pd.Series = None):
+        return self
+
+    def transform(self, X: pd.DataFrame):
+
+        X = X.copy()
+        X.to_excel(f"{self.output_folder}/reduced_data.xlsx")
+
         return X

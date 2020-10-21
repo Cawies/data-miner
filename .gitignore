@@ -9,7 +9,7 @@ __pycache__/
 *.py[cod]
 *$py.class
 
-# Virtual Environments and Notebook artifacts
+# Virtual Environments, Notebook and Testing artifacts
 .env
 .venv
 env/
@@ -20,3 +20,4 @@ venv.bak/
 
 .ipynb_checkpoints
 .vscode
+.pytest_cache/

@@ -71,6 +71,10 @@ reduction_pipeline = Pipeline(
         (
             "evaluate_RoC_predictive_capacity",
             rd.DecisionTreeRoC()
+        ),
+        (
+            "export_clean_data",
+            rd.ExportReducedData(output_folder=config.OUTPUT_DIR)
         )
     ]
 )
