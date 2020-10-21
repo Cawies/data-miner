@@ -3,6 +3,7 @@ from sklearn.pipeline import Pipeline
 
 # Internal modules
 from processing import preprocessors as pp
+from processing import reducers as rd
 from config import config
 
 
@@ -10,6 +11,9 @@ from config import config
 This module gathers the preprocessing transformers and organizes
 them into sequential steps within relevant pipelines.
 """
+
+
+# Data cleaning pipeline
 
 cleaning_pipeline = Pipeline(
     [
@@ -40,6 +44,33 @@ cleaning_pipeline = Pipeline(
         (
             "export_clean_data",
             pp.ExportCleanData(output_folder=config.OUTPUT_DIR)
+        )
+    ]
+)
+
+
+# Data reduction pipeline
+reduction_pipeline = Pipeline(
+    [
+        (
+            "eliminate_constants",
+            rd.EvaluateConstants(threshold=0.01)
+        ),
+        (
+            "remove_duplicates",
+            rd.RemoveDuplicates()
+        ),
+        (
+            "identify_correlated_predictors",
+            rd.IdentifyCorrelatedPredictors()
+        ),
+        (
+            "evaluate_entropy",
+            rd.EvaluateEntropy()
+        ),
+        (
+            "evaluate_RoC_predictive_capacity",
+            rd.DecisionTreeRoC()
         )
     ]
 )

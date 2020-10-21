@@ -9,7 +9,8 @@ from sklearn.feature_selection import mutual_info_classif
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.metrics import roc_auc_score
 
-
+# BUG: One of the reducers output different set of variables for each run
+# TODO: Set seed/random_state to ensure replicability
 
 """
 This module defines the methods for reducing the dataset using
@@ -47,6 +48,8 @@ class EvaluateConstants(BaseEstimator, TransformerMixin):
     def transform(self, X: pd.DataFrame) -> pd.DataFrame:
         """Apply the transforms to the dataframe."""
 
+        print('CONSTANTS')
+
         X = X.copy()
         
         constants = VarianceThreshold(threshold=self.threshold)
@@ -60,12 +63,9 @@ class EvaluateConstants(BaseEstimator, TransformerMixin):
 
 
 
-        print('Number of constant variables identified: ', len(constant_variables))
-        print('Number of variables in dataframe after removing constants: ', len(X.columns))
-
-        
-        
-        print('Evaluate Constants')
+        print('Number of variables identified for removal: ', len(constant_variables))
+        print('Number of variables remaining: ', len(X.columns))
+        print('_________________________________________________')
 
         return X
 
@@ -86,6 +86,8 @@ class RemoveDuplicates(BaseEstimator, TransformerMixin):
     def transform(self, X: pd.DataFrame) -> pd.DataFrame:
         """Apply the transforms to the dataframe."""
 
+        print('DUPLICATES')
+
         X = X.copy()
         
         duplicated_variables = []
@@ -99,14 +101,10 @@ class RemoveDuplicates(BaseEstimator, TransformerMixin):
                     duplicated_variables.append(var_2)
 
         print('Number of variables evaluated: ', len(X.columns))
-        print('Number of duplicated columns identified: ', len(duplicated_variables))
+        print('Number of variables identified for removal: ', len(duplicated_variables))
         X.drop(columns=duplicated_variables, axis=1, inplace=True)
-        print('Number of variables after removing duplicates: ', len(X.columns))
-
-        print('Remove duplicates')
-        
-        
-
+        print('Number of variables remaining: ', len(X.columns))
+        print('_________________________________________________')
         
         
         
@@ -130,6 +128,8 @@ class IdentifyCorrelatedPredictors(BaseEstimator, TransformerMixin):
         """Apply the transforms to the dataframe."""
 
         X = X.copy()
+
+        print('CORRELATIONS')
         
         # Identify groups of correlated variables
         correlations = X.corr().abs().unstack().sort_values(ascending=False)
@@ -146,7 +146,7 @@ class IdentifyCorrelatedPredictors(BaseEstimator, TransformerMixin):
 
                 correlated_groups.append(correlated_block)
         print(f"Number of variables evaulated: {len(X.columns)}")       
-        print(f"{len(correlated_groups)} correlated groups found.")
+        print(f"Number of correlated groups found: {len(correlated_groups)}")
 
         # Select one variable from each group with highest predictive value
         hold_importances = []
@@ -170,16 +170,11 @@ class IdentifyCorrelatedPredictors(BaseEstimator, TransformerMixin):
             variables_to_drop.append(list(group['variable'].iloc[1:]))
 
         variables_to_drop = list(set(sum(variables_to_drop, [])))
-        print(f"{len(variables_to_drop)} variables evaluated to be dropped.")
+        print(f"Number of variables identified for removal: {len(variables_to_drop)}")
         X.drop(columns=variables_to_drop, axis=1, inplace=True)
 
-        print(f"Number of remaining variables: {len(X.columns)}")
-
-
-        print('Correlations')
-
-
-
+        print(f"Number of variables remaining: {len(X.columns)}")
+        print('_________________________________________________')
 
         return X
 
@@ -200,6 +195,8 @@ class EvaluateEntropy(BaseEstimator, TransformerMixin):
     def transform(self, X: pd.DataFrame) -> pd.DataFrame:
         """Apply the transforms to the dataframe."""
 
+        print('ENTROPY')
+
         X = X.copy()
         
         sel_ = SelectKBest(mutual_info_classif, k=50).fit(X.drop('Target', axis=1), X['Target'])
@@ -208,11 +205,8 @@ class EvaluateEntropy(BaseEstimator, TransformerMixin):
         print(f"Keeping the 50 most predictive variables.")
     
         X = X[variables_to_keep+['Target']].copy()
-        print(f"Number of variables remaining: {len(X.columns)}")
-
-        print('Entropy')
-
-
+        print(f"Number of remaining variables: {len(X.columns)}")
+        print('_________________________________________________')
         
         return X
 
@@ -233,14 +227,17 @@ class DecisionTreeRoC(BaseEstimator, TransformerMixin):
     def transform(self, X: pd.DataFrame) -> pd.DataFrame:
         """Apply the transforms to the dataframe."""
 
+        print('DECISION TREE ROC')
+
         X = X.copy()
         
         roc_values = []
 
-        print(f"Evaluating {len(X.columns)} variables")
+
+        print(f"Number of variables evaluated: {len(X.columns)}")
     
         for variable in X.drop(columns='Target').columns:
-            clf = DecisionTreeClassifier()
+            clf = DecisionTreeClassifier(random_state=42)
             clf.fit(X[variable].to_frame(), X['Target'])
             y_scored = clf.predict_proba(X[variable].fillna(0).to_frame())
             roc_values.append(roc_auc_score(X['Target'], y_scored, multi_class='ovo'))
@@ -248,13 +245,8 @@ class DecisionTreeRoC(BaseEstimator, TransformerMixin):
         roc_values = pd.Series(roc_values)
         roc_values.index = X.drop(columns='Target').columns
         variables_to_keep = list(roc_values[roc_values>roc_values.mean()].index)
-        print(f"Keeping {len(variables_to_keep)} variables")
-
         X = X[variables_to_keep+['Target']].copy()
         print(f"Number of variables remaining: {len(X.columns)}")
+        X.to_excel('decision_tree.xlsx')
         
-        print('DecisionTree')
-
-
-        print('Remaining variables: ', len(X.columns))
         return X

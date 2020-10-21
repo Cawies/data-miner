@@ -38,7 +38,7 @@ class OneHeadHouseholds(BaseEstimator, TransformerMixin):
         sum_head_of_household = X.groupby('idhogar')['parentesco1'].sum().reset_index()
         sum_head_of_household = sum_head_of_household[sum_head_of_household['parentesco1']!=1]
 
-        print('{} Households have more or less than one head'.format(len(sum_head_of_household)))
+        #print('{} Households have more or less than one head'.format(len(sum_head_of_household)))
 
         # Remove households where sum hoh != 1
         X = X[~X['idhogar'].isin(sum_head_of_household['idhogar'])].copy()
@@ -71,15 +71,15 @@ class HouseholdTargetAligner(BaseEstimator, TransformerMixin):
 
         all_equal = X.groupby('idhogar')['Target'].apply(lambda x: x.nunique() == 1)
         not_equal = all_equal[all_equal != True]
-        print('There are {} households where the family members do not all have the same target.'.format(len(not_equal)))
+        #print('There are {} households where the family members do not all have the same target.'.format(len(not_equal)))
 
         households_leader = X.groupby('idhogar')['parentesco1'].sum()
 
         households_no_head = X.loc[X['idhogar'].isin(households_leader[households_leader == 0].index), :]
-        print('There are {} households without a head.'.format(households_no_head['idhogar'].nunique()))
+        #print('There are {} households without a head.'.format(households_no_head['idhogar'].nunique()))
 
         households_no_head_equal = households_no_head.groupby('idhogar')['Target'].apply(lambda x: x.nunique() == 1)
-        print('{} Households with no head have different labels.'.format(sum(households_no_head_equal == False)))
+        #print('{} Households with no head have different labels.'.format(sum(households_no_head_equal == False)))
 
 
         for household in not_equal.index:
