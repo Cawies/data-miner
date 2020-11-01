@@ -7,7 +7,9 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.feature_selection import SelectKBest 
 from sklearn.feature_selection import mutual_info_classif
 from sklearn.tree import DecisionTreeClassifier
+from sklearn.feature_selection import SelectFromModel
 from sklearn.metrics import roc_auc_score
+from sklearn.feature_selection import RFE
 
 # BUG: One of the reducers output different set of variables for each run
 # TODO: Set seed/random_state to ensure replicability
@@ -250,6 +252,39 @@ class DecisionTreeRoC(BaseEstimator, TransformerMixin):
         
         return X
 
+class RecursiveRandomForestImportance(BaseEstimator, TransformerMixin):
+    """ 
+    Evaluate importance of variable in Random Forest Classifier
+    using recursive selection.
+    """
+
+    def __init__(self, variables=None) -> None:
+        if not isinstance(variables, list):
+            self.variables = [variables]
+        else:
+            self.variables = variables
+
+    def fit(self, X: pd.DataFrame, y: pd.Series = None):
+        """Fit statement to accomodate the sklearn pipeline."""
+
+        return self
+
+    def transform(self, X: pd.DataFrame) -> pd.DataFrame:
+        """Apply the transforms to the dataframe."""
+
+        print('RANDOM FOREST CLASSIFIER')
+
+        X = X.copy()
+        rf = RFE(RandomForestClassifier(n_estimators=50, random_state=42), n_features_to_select=12)
+        rf.fit(X.drop('Target', axis=1), X['Target'])
+        print(f"Number of variables evaluated: {len(X.columns)}")
+
+        variables_to_keep = X.drop('Target', axis=1).columns[(rf.get_support())]
+        X = X[list(variables_to_keep)+['Target']].copy()
+        print(f"Number of variables remaining: {len(X.columns)}")
+        
+        return X
+
 class ExportReducedData(BaseEstimator, TransformerMixin):
     def __init__(self,output_folder=None):
         if not isinstance(output_folder, str):
@@ -263,6 +298,8 @@ class ExportReducedData(BaseEstimator, TransformerMixin):
     def transform(self, X: pd.DataFrame):
 
         X = X.copy()
-        X.to_excel(f"{self.output_folder}/reduced_data.xlsx")
+        X.to_excel(f"{self.output_folder}/reduced_data.xlsx", index=False)
+        print('Exporting reduced dataset...')
+        print('End pipeline.')
 
         return X

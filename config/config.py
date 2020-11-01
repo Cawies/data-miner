@@ -32,6 +32,8 @@ for reviewers and auditors.
 CATEGORICAL_VARIABLES = []
 CONTINOUS_VARIABLES = []
 
+TARGET = 'Target'
+
 IDENTIFIERS = ['Id', 'idhogar']
 
 INDIVIDUAL_LEVEL = ['v18q', 

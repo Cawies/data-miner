@@ -42,11 +42,17 @@ cleaning_pipeline = Pipeline(
             pp.AggregateHouseholds(variables=config.INDIVIDUAL_LEVEL),
         ),
         (
+            "binarize_targets",
+            pp.BinarizeTarget(variables=config.TARGET),
+        ),
+        (
             "export_clean_data",
             pp.ExportCleanData(output_folder=config.OUTPUT_DIR)
         )
     ]
 )
+
+
 
 
 # Data reduction pipeline
@@ -68,9 +74,13 @@ reduction_pipeline = Pipeline(
             "evaluate_entropy",
             rd.EvaluateEntropy()
         ),
+        #(
+        #    "evaluate_RoC_predictive_capacity",
+        #    rd.DecisionTreeRoC()
+        #),
         (
-            "evaluate_RoC_predictive_capacity",
-            rd.DecisionTreeRoC()
+            "RandomForestImportance",
+            rd.RecursiveRandomForestImportance()
         ),
         (
             "export_clean_data",

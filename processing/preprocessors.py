@@ -279,6 +279,29 @@ class AggregateHouseholds(BaseEstimator, TransformerMixin):
 
         return X
 
+class BinarizeTarget(BaseEstimator, TransformerMixin):
+    """
+    Convert Target variable from ordinal to binary.
+    """
+
+    def __init__(self,variables=None):
+        if not isinstance(variables, list):
+            self.variables = [variables]
+        else:
+            self.variables = variables
+
+    def fit(self, X: pd.DataFrame, y: pd.Series = None):
+        return self
+
+    def transform(self, X: pd.DataFrame):
+
+        X = X.copy()
+        X['Target'] = np.where(X['Target']==2, 1, np.where(X['Target']==3, 1, X['Target']))
+        X['Target'].replace(4,0, inplace=True)
+
+
+        return X
+
 class ExportCleanData(BaseEstimator, TransformerMixin):
     def __init__(self,output_folder=None):
         if not isinstance(output_folder, str):
@@ -292,6 +315,6 @@ class ExportCleanData(BaseEstimator, TransformerMixin):
     def transform(self, X: pd.DataFrame):
 
         X = X.copy()
-        X.to_excel(f"{self.output_folder}/clean_data.xlsx")
+        X.to_excel(f"{self.output_folder}/clean_data.xlsx", index=False)
 
         return X
