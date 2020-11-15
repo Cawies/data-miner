@@ -1,5 +1,9 @@
+# External libraries
 import pathlib
 import os
+from sklearn.linear_model import LogisticRegressionCV
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn import ensemble, naive_bayes, tree
 
 # DIRECTORY PATHS
 """
@@ -158,3 +162,70 @@ HOUSEHOLD_LEVEL = ['hacdor',
                    'edjefe',
                    'edjefa', 
                    'overcrowding']
+
+
+## MODELLING SPECIFICATIONS
+
+RANDOM_STATE = 42
+
+MODELS = {
+    'knn': {
+        'model': KNeighborsClassifier(),
+        'param_grid': {
+            'n_neighbors': list(range(1,10)),
+            'leaf_size': list(range(1,10)),
+            'weights': ['uniform', 'distance'],
+            'p': [1,2],
+            'n_jobs': [-1],
+            'random_state': [RANDOM_STATE]
+        }  
+    },
+    'logistic_regression': {
+        'model': LogisticRegressionCV(),
+        'param_grid': {
+            'criterion': ['gini', 'entropy'],
+            'splitter': ['best', 'random'],
+            'max_depth': [2,4,6,8,10, None],
+            'random_state': [RANDOM_STATE]
+        }
+    },
+    'BernoulliNB': {
+        'model': naive_bayes.BernoulliNB(),
+        'param_grid': {}
+    },
+    'GaussianNB': {
+        'model': naive_bayes.GaussianNB(),
+        'param_grid': {}
+    },
+    'DecisionTreeClassifier': {
+        'model': tree.DecisionTreeClassifier(),
+        'param_grid': {
+            'criterion': ['gini', 'entropy'],
+            'splitter': ['best', 'random'],
+            'max_depth': [2,4,6,8,10, None],
+            'random_state': [RANDOM_STATE]
+        }
+    },
+    'AdaBoostClassifier': {
+        'model': ensemble.AdaBoostClassifier(),
+        'param_grid': {
+            'base_estimator': [
+                None,
+                LogisticRegressionCV(),
+                tree.DecisionTreeClassifier(),
+                naive_bayes.GaussianNB()]
+        }
+    },
+    'RandomForestClassifier': {
+        'model': ensemble.RandomForestClassifier(),
+        'param_grid': {
+            'n_estimators': [15,25,30,35],
+            'criterion': ['gini', 'entropy'],
+            'max_depth': [2,4,6,None],
+            'min_samples_split': [2,5,7,10,12],
+            'max_features': [2,3, 'auto'],
+            'random_state': [RANDOM_STATE]
+        }
+    }
+    
+}
