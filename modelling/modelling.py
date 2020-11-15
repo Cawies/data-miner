@@ -13,8 +13,7 @@ def BaseLineModels(models, X, y):
     cv_split = ShuffleSplit(n_splits = 10, test_size = .3, train_size = .7, random_state = 42)
     baseline_output = pd.DataFrame(columns=['model', 'mean_train_acc', 'mean_test_acc', 'parameters'])
     
-    for model in models:
-        print(model.__class__.__name__)
+    for model in [models[key]['model'] for key in models]:
         baseline_output.loc[row_index, 'model'] = model.__class__.__name__
         cross_validation_result = cross_validate(model, X, y, cv = cv_split, return_train_score=True, scoring='f1')
         model_parameters = model.fit(X, y).get_params()
