@@ -1,9 +1,10 @@
 # External libraries
 import pathlib
 import os
-from sklearn.linear_model import LogisticRegressionCV
+from sklearn.linear_model import LogisticRegression
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn import ensemble, naive_bayes, tree
+import numpy as np
 
 # DIRECTORY PATHS
 """
@@ -169,7 +170,7 @@ HOUSEHOLD_LEVEL = ['hacdor',
 RANDOM_STATE = 42
 
 MODELS = {
-    'knn': {
+    'KNeighborsClassifier': {
         'model': KNeighborsClassifier(),
         'param_grid': {
             'n_neighbors': list(range(1,10)),
@@ -177,15 +178,16 @@ MODELS = {
             'weights': ['uniform', 'distance'],
             'p': [1,2],
             'n_jobs': [-1],
-            'random_state': [RANDOM_STATE]
         }  
     },
-    'logistic_regression': {
-        'model': LogisticRegressionCV(),
+    'LogisticRegression': {
+        'model': LogisticRegression(),
         'param_grid': {
-            'criterion': ['gini', 'entropy'],
-            'splitter': ['best', 'random'],
-            'max_depth': [2,4,6,8,10, None],
+            'penalty': ['l2'],
+            'C': list(10.**np.arange(-4., 6.)),
+            'class_weight': [{1:0.5, 0:0.5}, {1:0.4, 0:0.6}, {1:0.6, 0:0.4}, {1:0.7, 0:0.3}],
+            'solver': ['lbfgs'],
+            'max_iter': [1000],
             'random_state': [RANDOM_STATE]
         }
     },
@@ -211,7 +213,7 @@ MODELS = {
         'param_grid': {
             'base_estimator': [
                 None,
-                LogisticRegressionCV(),
+                LogisticRegression(),
                 tree.DecisionTreeClassifier(),
                 naive_bayes.GaussianNB()]
         }

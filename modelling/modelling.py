@@ -30,22 +30,22 @@ def BaseLineModels(models, X, y):
     row_index = 0
     tuned_output = pd.DataFrame(columns=['model', 'mean_train_acc_tuned', 'mean_test_acc_tuned', 'parameters_tuned'])
     
-    
-    for model in baseline_output.iloc[:4]['model']:
-        if len(config.MODELS[model]['param_grid'])!=0:
-            tuned_output.loc[row_index, 'model'] = config.MODELS[model]['model'].__class__.__name__
-            tuned_model = RandomizedSearchCV(config.MODELS[model]['model'], param_distributions=config.MODELS[model]['param_grid'], scoring = 'f1', cv = cv_split, return_train_score=True)
-            tuned_model.fit(X, y)
-            
-            tuned_output.loc[row_index, 'mean_train_acc_tuned'] = tuned_model.cv_results_['mean_train_score'][tuned_model.best_index_]
-            tuned_output.loc[row_index, 'mean_test_acc_tuned'] = tuned_model.cv_results_['mean_test_score'][tuned_model.best_index_]
-            tuned_output.loc[row_index, 'parameters_tuned'] = [tuned_model.best_params_]
-            row_index+=1
+    for model in [models[key] for key in models]:
+        tuned_output.loc[row_index, 'model'] = model['model'].__class__.__name__
+        tuned_model = RandomizedSearchCV(model['model'], param_distributions=model['param_grid'], scoring = 'f1', cv = cv_split, return_train_score=True)
+        tuned_model.fit(X, y)
+
+        tuned_output.loc[row_index, 'mean_train_acc_tuned'] = tuned_model.cv_results_['mean_train_score'][tuned_model.best_index_]
+        tuned_output.loc[row_index, 'mean_test_acc_tuned'] = tuned_model.cv_results_['mean_test_score'][tuned_model.best_index_]
+        tuned_output.loc[row_index, 'parameters_tuned'] = [tuned_model.best_params_]
+        row_index+=1
 
     
 
     output = baseline_output.join(tuned_output.set_index('model'), on='model')
-    return output
+    output.sort_values(by='mean_test_acc_tuned', ascending=False, inplace=True)
+    
+    return output #baseline_output, tuned_output
 
 
 #output = BaseLineModels(models_to_pass, scaler.fit_transform(X_train), y_train)
