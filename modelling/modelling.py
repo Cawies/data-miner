@@ -3,6 +3,8 @@ import pandas as pd
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import RandomizedSearchCV
 from sklearn.model_selection import cross_validate, ShuffleSplit
+import ast
+import joblib
 
 # Internal modules
 from config import config
@@ -44,8 +46,15 @@ def BaseLineModels(models, X, y):
 
     output = baseline_output.join(tuned_output.set_index('model'), on='model')
     output.sort_values(by='mean_test_acc_tuned', ascending=False, inplace=True)
+    output.to_excel(f"{config.OUTPUT_DIR}/model_performances.xlsx", index=False)
+
+    output = baseline_output.join(tuned_output.set_index('model'), on='model')
+    output.sort_values(by='mean_test_acc_tuned', ascending=False, inplace=True)
+    
+    best_model_name = models[output.iloc[0][['model']].values[0]]['model']
+    best_parameters = output.iloc[0]['parameters_tuned'][0]
+    best_model = best_model_name.set_params(**best_parameters)
+    joblib.dump(best_model, f"{config.OUTPUT_DIR}/{models[output.iloc[0][['model']].values[0]]['model'].__class__.__name__}.pkl")
+    
     
     return output #baseline_output, tuned_output
-
-
-#output = BaseLineModels(models_to_pass, scaler.fit_transform(X_train), y_train)

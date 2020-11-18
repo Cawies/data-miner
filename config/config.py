@@ -15,6 +15,7 @@ PACKAGE_ROOT = pathlib.Path(__file__).resolve().parent.parent
 DATA_DIR = f"{PACKAGE_ROOT}/data"
 OUTPUT_DIR = f"{PACKAGE_ROOT}/output"
 DATA_FILE = 'train.csv'
+PERFORMANCE_OUTPUT_FILE = 'model_performances'
 
 
 # ENVIRONMENT VARIABLES

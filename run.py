@@ -26,8 +26,8 @@ def run_package():
         random_state=config.RANDOM_STATE)
     
     scaler = StandardScaler()
-    output = modelling.BaseLineModels(config.MODELS, scaler.fit_transform(X_train), y_train)
-    output.to_excel('model_performances.xlsx', index=False)
+    performance_output = modelling.BaseLineModels(config.MODELS, scaler.fit_transform(X_train), y_train)
+    performance_output.to_excel('model_performances.xlsx', index=False)
     
 
 
